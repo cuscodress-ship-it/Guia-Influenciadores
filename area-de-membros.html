@@ -222,9 +222,14 @@
     let dbSteps = [];
     let dbVideos = [];
 
-    // Deriva o caminho da capa a partir do vídeo, ex:
-    // "assets/video/storyselling.mp4" -> "assets/img/capa-storyselling.jpg"
+    // Deriva o caminho da capa a partir do vídeo. Como os vídeos no Vercel
+    // Blob ganham um código aleatório no nome do arquivo, primeiro tentamos
+    // reconhecer os vídeos conhecidos por palavra-chave; se não encontrar,
+    // cai no padrão antigo (nome do arquivo sem extensão).
     function getThumbnailPath(storagePath) {
+      const known = ["boas-vindas", "intro", "storyselling", "passo-a-passo-reels"];
+      const match = known.find((key) => storagePath.includes(key));
+      if (match) return `assets/img/capa-${match === "intro" ? "boas-vindas" : match}.jpg`;
       const filename = storagePath.split("/").pop().replace(/\.[^/.]+$/, "");
       return `assets/img/capa-${filename}.jpg`;
     }

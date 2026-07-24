@@ -219,6 +219,15 @@
     const progressFill = document.getElementById("progress-fill");
     const progressContainer = document.getElementById("progress-container");
 
+    // Deriva o caminho da capa a partir do vídeo (mesma lógica da área de membros)
+    function getThumbnailPath(storagePath) {
+      const known = ["boas-vindas", "intro", "storyselling", "passo-a-passo-reels"];
+      const match = known.find((key) => storagePath.includes(key));
+      if (match) return `assets/img/capa-${match === "intro" ? "boas-vindas" : match}.jpg`;
+      const filename = storagePath.split("/").pop().replace(/\.[^/.]+$/, "");
+      return `assets/img/capa-${filename}.jpg`;
+    }
+
     let currentUser = null;
     let currentVideo = null;
     let allVideos = [];
@@ -295,6 +304,9 @@
         const stepVideos = allVideos.filter(v => v.step_id === currentVideo.step_id);
         const currentIndex = stepVideos.findIndex(v => v.id === currentVideo.id);
         lessonIndexTitle.textContent = `Aula ${currentIndex + 1} de ${stepVideos.length}`;
+
+        // Capa exibida antes/durante o carregamento do vídeo
+        videoEl.setAttribute("poster", getThumbnailPath(currentVideo.storage_path));
 
         // Carrega Fonte do Vídeo.
         // Se storage_path já é um caminho/URL direto (ex: "assets/video/x.mp4"
