@@ -290,6 +290,7 @@
             class="watch-btn"
             data-video="https://fynk4omqzpttvrnd.public.blob.vercel-storage.com/storyselling-rK3Hh1y36NRzwOXSu9RLLF4VBCKKMe.mp4"
             data-title="Storyselling"
+            data-poster="assets/img/capa-storyselling.jpg"
           >▶ Assistir vídeo</button>
         </div>
       </div>
@@ -307,6 +308,7 @@
             class="watch-btn"
             data-video="https://fynk4omqzpttvrnd.public.blob.vercel-storage.com/passo-a-passo-reels-u5TsJmY78r0lyS6CfYxjCzPDTdi5Aa.mp4"
             data-title="Passo a Passo de um Reels"
+            data-poster="assets/img/capa-passo-a-passo-reels.jpg"
           >▶ Assistir vídeo</button>
         </div>
       </div>
@@ -510,8 +512,13 @@
     const videoModalTitle = document.getElementById("video-modal-title");
     const videoModalClose = document.getElementById("video-modal-close");
 
-    function openVideoModal(src, title) {
+    function openVideoModal(src, title, poster) {
       videoModalPlayer.src = src;
+      if (poster) {
+        videoModalPlayer.setAttribute("poster", poster);
+      } else {
+        videoModalPlayer.removeAttribute("poster");
+      }
       videoModalTitle.textContent = title || "";
       videoModal.classList.add("open");
       videoModalPlayer.play().catch(() => {});
@@ -521,12 +528,13 @@
       videoModal.classList.remove("open");
       videoModalPlayer.pause();
       videoModalPlayer.removeAttribute("src");
+      videoModalPlayer.removeAttribute("poster");
       videoModalPlayer.load();
     }
 
     document.querySelectorAll(".watch-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        openVideoModal(btn.dataset.video, btn.dataset.title);
+        openVideoModal(btn.dataset.video, btn.dataset.title, btn.dataset.poster);
       });
     });
 
