@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Referências · Guia de Conteúdo</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .ref-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ref-card__title {
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .ref-card__desc {
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+    .ref-card__link {
+      align-self: flex-start;
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-accent-ink);
+      background: var(--color-accent-soft);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <div class="topbar">
+      <a class="topbar__back" href="area-de-membros.html" aria-label="Voltar">←</a>
+      <span class="topbar__title">Referências</span>
+    </div>
+
+    <div class="container">
+      <p class="text-muted" style="margin-bottom: 24px;">
+        Vídeos e conteúdos de outras contas pra você se inspirar na hora de gravar.
+      </p>
+
+      <div id="refs-container" class="stack">
+        <p class="text-muted">Carregando…</p>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <a href="area-de-membros.html" class="bottom-nav__item">
+        <span class="bottom-nav__icon">🎬</span>
+        <span>Guia</span>
+      </a>
+      <a href="referencias.html" class="bottom-nav__item active">
+        <span class="bottom-nav__icon">🔗</span>
+        <span>Referências</span>
+      </a>
+      <a href="area-de-membros.html" class="bottom-nav__item" id="nav-btn-perfil-link">
+        <span class="bottom-nav__icon">👤</span>
+        <span>Perfil</span>
+      </a>
+    </nav>
+  </div>
+
+  <script type="module">
+    import { isConfigured, supabase } from "./assets/js/supabaseClient.js";
+    import { warnIfNotConfigured } from "./assets/js/auth.js";
+
+    warnIfNotConfigured();
+
+    const container = document.getElementById("refs-container");
+
+    async function checkAuthentication() {
+      if (isConfigured) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = "entrar.html";
+          return;
+        }
+      } else {
+        const sessionUser = localStorage.getItem("mock_session_user");
+        if (!sessionUser) {
+          window.location.href = "entrar.html";
+          return;
+        }
+      }
+      await loadReferences();
+    }
+
+    async function loadReferences() {
+      let refs = [];
+      try {
+        if (isConfigured) {
+          const { data, error } = await supabase
+            .from("reference_links")
+            .select("*")
+            .order("order_index", { ascending: true });
+          if (error) throw error;
+          refs = data || [];
+        } else {
+          refs = JSON.parse(localStorage.getItem("mock_reference_links") || "[]")
+            .sort((a, b) => a.order_index - b.order_index);
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="form-message error">Erro ao carregar referências: ${err.message}</div>`;
+        return;
+      }
+
+      if (refs.length === 0) {
+        container.innerHTML = `<div class="empty-state">Nenhuma referência adicionada ainda. Volte em breve!</div>`;
+        return;
+      }
+
+      container.innerHTML = refs
+        .map(
+          (ref) => `
+            <div class="ref-card">
+              <div class="ref-card__title">${ref.title}</div>
+              ${ref.description ? `<div class="ref-card__desc">${ref.description}</div>` : ""}
+              <a class="ref-card__link" href="${ref.url}" target="_blank" rel="noopener">Abrir vídeo ↗</a>
+            </div>
+          `
+        )
+        .join("");
+    }
+
+    checkAuthentication();
+  </script>
+</body>
+</html>

@@ -99,6 +99,7 @@
     <div class="admin-tabs">
       <button class="admin-tab-btn active" id="tab-steps-btn">📁 Passos / Etapas</button>
       <button class="admin-tab-btn" id="tab-videos-btn">🎥 Aulas / Vídeos</button>
+      <button class="admin-tab-btn" id="tab-refs-btn">🔗 Referências</button>
     </div>
 
     <!-- Conteúdo do Painel -->
@@ -205,6 +206,45 @@
 
       </div>
 
+      <!-- SEÇÃO 3: REFERÊNCIAS -->
+      <div id="section-refs" class="stack hidden" style="gap: var(--space-5);">
+
+        <!-- Formulário Adicionar Referência -->
+        <div style="background: var(--color-surface); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: var(--space-3);">Adicionar Referência</h3>
+          <form id="form-ref" class="stack" style="gap: var(--space-3);">
+            <div class="field" style="margin-bottom:0;">
+              <label for="ref-title">TÍTULO</label>
+              <input type="text" id="ref-title" required placeholder="Ex: Exemplo de Reels com gancho forte">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="ref-desc">DESCRIÇÃO (OPCIONAL)</label>
+              <textarea id="ref-desc" placeholder="Por que esse vídeo é uma boa referência..." rows="2"></textarea>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="ref-url">LINK DO VÍDEO</label>
+              <input type="url" id="ref-url" required placeholder="https://...">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="ref-order">ORDEM DE EXIBIÇÃO</label>
+              <input type="number" id="ref-order" required value="1" min="0">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-submit-ref" style="min-height: 44px; font-size:14px; margin-top: var(--space-3);">
+              Adicionar Referência
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de Referências Cadastradas -->
+        <div class="stack" style="gap: var(--space-3);">
+          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 2px;">Referências Cadastradas</h3>
+          <div id="refs-list" class="stack" style="gap: var(--space-3);">
+            <!-- Renderizado dinamicamente -->
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
   </div>
@@ -214,23 +254,28 @@
 
     let steps = [];
     let videos = [];
+    let refs = [];
     let currentUser = null;
 
     const msgContainer = document.getElementById("message-container");
 
     const sectionSteps = document.getElementById("section-steps");
     const sectionVideos = document.getElementById("section-videos");
-    
+    const sectionRefs = document.getElementById("section-refs");
+
     const tabStepsBtn = document.getElementById("tab-steps-btn");
     const tabVideosBtn = document.getElementById("tab-videos-btn");
+    const tabRefsBtn = document.getElementById("tab-refs-btn");
 
     const stepsListEl = document.getElementById("steps-list");
     const videosListEl = document.getElementById("videos-list");
+    const refsListEl = document.getElementById("refs-list");
 
     const selectStepEl = document.getElementById("video-step-id");
 
     const formStep = document.getElementById("form-step");
     const formVideo = document.getElementById("form-video");
+    const formRef = document.getElementById("form-ref");
 
     const supabaseUploadBox = document.getElementById("supabase-upload-box");
     const videoPathLabel = document.getElementById("video-path-label");
@@ -284,13 +329,17 @@
           steps = sData || [];
           const { data: vData } = await supabase.from("videos").select("*").order("order_index", { ascending: true });
           videos = vData || [];
+          const { data: rData } = await supabase.from("reference_links").select("*").order("order_index", { ascending: true });
+          refs = rData || [];
         } else {
           steps = JSON.parse(localStorage.getItem("mock_steps") || "[]");
           videos = JSON.parse(localStorage.getItem("mock_videos") || "[]");
+          refs = JSON.parse(localStorage.getItem("mock_reference_links") || "[]");
         }
 
         renderSteps();
         renderVideos();
+        renderRefs();
       } catch (err) {
         showMsg("Erro ao buscar dados: " + err.message, "error");
       }
@@ -355,6 +404,85 @@
         item.querySelector("button").addEventListener("click", () => deleteVideo(video.id));
         videosListEl.appendChild(item);
       });
+    }
+
+    // Renderiza Referências
+    function renderRefs() {
+      refsListEl.innerHTML = "";
+
+      if (refs.length === 0) {
+        refsListEl.innerHTML = '<p class="text-muted text-center" style="font-size:13px; padding:20px 0;">Nenhuma referência cadastrada.</p>';
+        return;
+      }
+
+      refs.forEach(ref => {
+        const item = document.createElement("div");
+        item.className = "list-item";
+        item.innerHTML = `
+          <div>
+            <div class="list-item__title">${ref.title}</div>
+            <div class="list-item__subtitle">Ordem: ${ref.order_index}</div>
+          </div>
+          <button class="btn-danger-sm" data-id="${ref.id}">Excluir</button>
+        `;
+
+        item.querySelector("button").addEventListener("click", () => deleteRef(ref.id));
+        refsListEl.appendChild(item);
+      });
+    }
+
+    // Ação: Adicionar Referência
+    formRef.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById("ref-title").value.trim();
+      const description = document.getElementById("ref-desc").value.trim();
+      const url = document.getElementById("ref-url").value.trim();
+      const order_index = parseInt(document.getElementById("ref-order").value);
+
+      try {
+        if (isConfigured) {
+          const { error } = await supabase
+            .from("reference_links")
+            .insert([{ title, description, url, order_index }]);
+          if (error) throw error;
+        } else {
+          const newRef = {
+            id: 'mock-ref-' + Math.random().toString(36).substr(2, 9),
+            title,
+            description,
+            url,
+            order_index
+          };
+          refs.push(newRef);
+          localStorage.setItem("mock_reference_links", JSON.stringify(refs));
+        }
+
+        showMsg("Referência adicionada com sucesso!", "success");
+        formRef.reset();
+        await loadData();
+      } catch (err) {
+        showMsg("Erro ao salvar referência: " + err.message, "error");
+      }
+    });
+
+    // Ação: Excluir Referência
+    async function deleteRef(id) {
+      if (!confirm("Tem certeza que deseja excluir essa referência?")) return;
+
+      try {
+        if (isConfigured) {
+          const { error } = await supabase.from("reference_links").delete().eq("id", id);
+          if (error) throw error;
+        } else {
+          refs = refs.filter(r => r.id !== id);
+          localStorage.setItem("mock_reference_links", JSON.stringify(refs));
+        }
+        showMsg("Referência excluída com sucesso!", "success");
+        await loadData();
+      } catch (err) {
+        showMsg("Erro ao excluir: " + err.message, "error");
+      }
     }
 
     // Ação: Adicionar Passo
@@ -524,19 +652,18 @@
     }
 
     // Tabs do painel
-    tabStepsBtn.addEventListener("click", () => {
-      tabStepsBtn.classList.add("active");
-      tabVideosBtn.classList.remove("active");
-      sectionSteps.classList.remove("hidden");
-      sectionVideos.classList.add("hidden");
-    });
+    function showTab(tab) {
+      tabStepsBtn.classList.toggle("active", tab === "steps");
+      tabVideosBtn.classList.toggle("active", tab === "videos");
+      tabRefsBtn.classList.toggle("active", tab === "refs");
+      sectionSteps.classList.toggle("hidden", tab !== "steps");
+      sectionVideos.classList.toggle("hidden", tab !== "videos");
+      sectionRefs.classList.toggle("hidden", tab !== "refs");
+    }
 
-    tabVideosBtn.addEventListener("click", () => {
-      tabStepsBtn.classList.remove("active");
-      tabVideosBtn.classList.add("active");
-      sectionSteps.classList.add("hidden");
-      sectionVideos.classList.remove("hidden");
-    });
+    tabStepsBtn.addEventListener("click", () => showTab("steps"));
+    tabVideosBtn.addEventListener("click", () => showTab("videos"));
+    tabRefsBtn.addEventListener("click", () => showTab("refs"));
 
     checkAdminAuth();
   </script>
