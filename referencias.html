@@ -123,7 +123,7 @@
             <div class="ref-card">
               <div class="ref-card__title">${ref.title}</div>
               ${ref.description ? `<div class="ref-card__desc">${ref.description}</div>` : ""}
-              <a class="ref-card__link" href="${ref.url}" target="_blank" rel="noopener">Abrir vídeo ↗</a>
+              <a class="ref-card__link" href="${ref.url}" target="_blank" rel="noopener">${ref.url.toLowerCase().includes(".pdf") ? "Abrir PDF ↗" : "Abrir vídeo ↗"}</a>
             </div>
           `
         )
