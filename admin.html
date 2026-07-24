@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin — Guia para Influenciadoras</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', var(--font-base);
+    }
+    .admin-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-surface);
+    }
+    .admin-tab-btn {
+      flex: 1;
+      padding: var(--space-4) 0;
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--color-text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+    }
+    .admin-tab-btn.active {
+      color: var(--color-accent);
+    }
+    .admin-tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      right: 20%;
+      height: 3px;
+      background: var(--color-accent);
+      border-radius: var(--radius-pill);
+    }
+    .list-item {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .list-item__title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+    .list-item__subtitle {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+    .btn-danger-sm {
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      border: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-danger-sm:hover {
+      background: var(--color-accent);
+      color: white;
+    }
+    .mock-warning-banner {
+      background: linear-gradient(90deg, #e64980 0%, #f492b4 100%);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="no-nav">
+
+  <div class="screen">
+    
+    <!-- Banner do Modo Demo -->
+    <div id="mock-banner" class="mock-warning-banner" style="display: none;">
+      <span>✨ Painel Administrador Simulador (Mock Mode)</span>
+    </div>
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <a href="area-de-membros.html" class="topbar__back">←</a>
+      <div class="topbar__title">Painel de Gerenciamento</div>
+    </div>
+
+    <!-- Abas -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" id="tab-steps-btn">📁 Passos / Etapas</button>
+      <button class="admin-tab-btn" id="tab-videos-btn">🎥 Aulas / Vídeos</button>
+    </div>
+
+    <!-- Conteúdo do Painel -->
+    <div class="container">
+      <div id="message-container"></div>
+
+      <!-- SEÇÃO 1: PASSOS -->
+      <div id="section-steps" class="stack" style="gap: var(--space-5);">
+        
+        <!-- Formulário Adicionar Passo -->
+        <div style="background: var(--color-surface); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: var(--space-3);">Adicionar Novo Passo</h3>
+          <form id="form-step" class="stack" style="gap: var(--space-3);">
+            <div class="field" style="margin-bottom:0;">
+              <label for="step-title">TÍTULO DO PASSO</label>
+              <input type="text" id="step-title" required placeholder="Ex: 1. Comece Por Aqui">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="step-desc">DESCRIÇÃO (OPCIONAL)</label>
+              <textarea id="step-desc" placeholder="Resumo do que será aprendido nessa etapa..." rows="2"></textarea>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="step-order">ORDEM DE EXIBIÇÃO</label>
+              <input type="number" id="step-order" required value="1" min="0">
+            </div>
+            <button type="submit" class="btn btn-primary" style="min-height: 44px; font-size:14px; margin-top: var(--space-3);">
+              Adicionar Passo
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de Passos Cadastrados -->
+        <div class="stack" style="gap: var(--space-3);">
+          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 2px;">Passos Cadastrados</h3>
+          <div id="steps-list" class="stack" style="gap: var(--space-3);">
+            <!-- Renderizado dinamicamente -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SEÇÃO 2: VÍDEOS -->
+      <div id="section-videos" class="stack hidden" style="gap: var(--space-5);">
+        
+        <!-- Formulário Adicionar Vídeo -->
+        <div style="background: var(--color-surface); padding: var(--space-4); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: var(--space-3);">Adicionar Novo Vídeo</h3>
+          <form id="form-video" class="stack" style="gap: var(--space-3);">
+            
+            <div class="field" style="margin-bottom:0;">
+              <label for="video-step-id">SELECIONE O PASSO</label>
+              <select id="video-step-id" required>
+                <!-- Preenchido dinamicamente -->
+              </select>
+            </div>
+
+            <div class="field" style="margin-bottom:0;">
+              <label for="video-title">TÍTULO DO VÍDEO</label>
+              <input type="text" id="video-title" required placeholder="Ex: Equipamentos de Luz Baratos">
+            </div>
+
+            <div class="field" style="margin-bottom:0;">
+              <label for="video-desc">DESCRIÇÃO (OPCIONAL)</label>
+              <textarea id="video-desc" placeholder="Detalhes do vídeo..." rows="2"></textarea>
+            </div>
+
+            <!-- Upload Real vs Link de Vídeo -->
+            <div id="supabase-upload-box" style="display: none; padding: var(--space-3); background: var(--color-locked); border-radius: var(--radius-md); border: 1px dashed var(--color-border);">
+              <label style="font-size:12px; font-weight:700; color:var(--color-text-muted); display:block; margin-bottom:6px;">ARQUIVO DE VÍDEO (SUPABASE STORAGE)</label>
+              <input type="file" id="video-file-upload" accept="video/mp4,video/quicktime" style="padding:4px; font-size:13px; border:none; min-height:auto; background:transparent;">
+              <p class="text-muted" style="font-size: 10px; margin: 4px 0 0 0;">O arquivo será enviado para o bucket privado 'videos'.</p>
+            </div>
+
+            <div class="field" style="margin-bottom:0;" id="video-path-field">
+              <label for="video-path" id="video-path-label">CADASTRAR POR CAMINHO / URL DIRETO</label>
+              <input type="text" id="video-path" placeholder="Ex: aula-1.mp4 ou URL de teste">
+            </div>
+
+            <div class="field" style="margin-bottom:0;">
+              <label for="video-order">ORDEM NO PASSO</label>
+              <input type="number" id="video-order" required value="1" min="0">
+            </div>
+
+            <div class="field" style="margin-bottom:0;">
+              <label style="display:flex; align-items:center; gap:var(--space-2); cursor:pointer;">
+                <input type="checkbox" id="video-is-free" checked style="width:18px; min-height:18px; margin:0;">
+                <span>Liberado para plano <strong>Gratuito</strong></span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn-submit-video" style="min-height: 44px; font-size:14px; margin-top: var(--space-3);">
+              Adicionar Vídeo
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de Vídeos Cadastrados -->
+        <div class="stack" style="gap: var(--space-3);">
+          <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 2px;">Vídeos Cadastrados</h3>
+          <div id="videos-list" class="stack" style="gap: var(--space-3);">
+            <!-- Renderizado dinamicamente -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { isConfigured, supabase } from "./assets/js/supabaseClient.js";
+
+    let steps = [];
+    let videos = [];
+    let currentUser = null;
+
+    const msgContainer = document.getElementById("message-container");
+
+    const sectionSteps = document.getElementById("section-steps");
+    const sectionVideos = document.getElementById("section-videos");
+    
+    const tabStepsBtn = document.getElementById("tab-steps-btn");
+    const tabVideosBtn = document.getElementById("tab-videos-btn");
+
+    const stepsListEl = document.getElementById("steps-list");
+    const videosListEl = document.getElementById("videos-list");
+
+    const selectStepEl = document.getElementById("video-step-id");
+
+    const formStep = document.getElementById("form-step");
+    const formVideo = document.getElementById("form-video");
+
+    const supabaseUploadBox = document.getElementById("supabase-upload-box");
+    const videoPathLabel = document.getElementById("video-path-label");
+
+    // Verifica autenticação admin
+    async function checkAdminAuth() {
+      if (isConfigured) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = "entrar.html";
+          return;
+        }
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+        
+        if (!profile || !profile.is_admin) {
+          alert("Acesso restrito para administradores.");
+          window.location.href = "area-de-membros.html";
+          return;
+        }
+        currentUser = profile;
+        // Mostra bloco de upload real
+        supabaseUploadBox.style.display = "block";
+        videoPathLabel.textContent = "OU INSIRA O CAMINHO DE ARQUIVO MANUAL";
+      } else {
+        document.getElementById("mock-banner").style.display = "block";
+        const sessionUser = localStorage.getItem("mock_session_user");
+        if (!sessionUser) {
+          window.location.href = "entrar.html";
+          return;
+        }
+        currentUser = JSON.parse(sessionUser);
+        if (!currentUser.is_admin) {
+          alert("Você precisa simular um login Admin para ver esta página.");
+          window.location.href = "area-de-membros.html";
+          return;
+        }
+      }
+
+      await loadData();
+    }
+
+    // Carrega dados das listas
+    async function loadData() {
+      try {
+        if (isConfigured) {
+          const { data: sData } = await supabase.from("steps").select("*").order("order_index", { ascending: true });
+          steps = sData || [];
+          const { data: vData } = await supabase.from("videos").select("*").order("order_index", { ascending: true });
+          videos = vData || [];
+        } else {
+          steps = JSON.parse(localStorage.getItem("mock_steps") || "[]");
+          videos = JSON.parse(localStorage.getItem("mock_videos") || "[]");
+        }
+
+        renderSteps();
+        renderVideos();
+      } catch (err) {
+        showMsg("Erro ao buscar dados: " + err.message, "error");
+      }
+    }
+
+    // Renderiza Passos
+    function renderSteps() {
+      stepsListEl.innerHTML = "";
+      selectStepEl.innerHTML = '<option value="">-- Selecione o Passo --</option>';
+
+      if (steps.length === 0) {
+        stepsListEl.innerHTML = '<p class="text-muted text-center" style="font-size:13px; padding:20px 0;">Nenhum passo cadastrado.</p>';
+        return;
+      }
+
+      steps.forEach(step => {
+        // Popula dropdown de vídeo
+        const option = document.createElement("option");
+        option.value = step.id;
+        option.textContent = step.title;
+        selectStepEl.appendChild(option);
+
+        // Popula lista do admin
+        const item = document.createElement("div");
+        item.className = "list-item";
+        item.innerHTML = `
+          <div>
+            <div class="list-item__title">${step.title}</div>
+            <div class="list-item__subtitle">Ordem: ${step.order_index}</div>
+          </div>
+          <button class="btn-danger-sm" data-id="${step.id}">Excluir</button>
+        `;
+        
+        item.querySelector("button").addEventListener("click", () => deleteStep(step.id));
+        stepsListEl.appendChild(item);
+      });
+    }
+
+    // Renderiza Vídeos
+    function renderVideos() {
+      videosListEl.innerHTML = "";
+
+      if (videos.length === 0) {
+        videosListEl.innerHTML = '<p class="text-muted text-center" style="font-size:13px; padding:20px 0;">Nenhum vídeo cadastrado.</p>';
+        return;
+      }
+
+      videos.forEach(video => {
+        const step = steps.find(s => s.id === video.step_id);
+        const stepName = step ? step.title : "Passo excluído";
+
+        const item = document.createElement("div");
+        item.className = "list-item";
+        item.innerHTML = `
+          <div>
+            <div class="list-item__title">${video.title}</div>
+            <div class="list-item__subtitle">${stepName} | Ordem: ${video.order_index} | ${video.is_free ? "Grátis" : "Premium"}</div>
+          </div>
+          <button class="btn-danger-sm" data-id="${video.id}">Excluir</button>
+        `;
+        
+        item.querySelector("button").addEventListener("click", () => deleteVideo(video.id));
+        videosListEl.appendChild(item);
+      });
+    }
+
+    // Ação: Adicionar Passo
+    formStep.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const title = document.getElementById("step-title").value.trim();
+      const description = document.getElementById("step-desc").value.trim();
+      const order_index = parseInt(document.getElementById("step-order").value);
+
+      try {
+        if (isConfigured) {
+          const { error } = await supabase
+            .from("steps")
+            .insert([{ title, description, order_index }]);
+          if (error) throw error;
+        } else {
+          const newStep = {
+            id: 'mock-step-' + Math.random().toString(36).substr(2, 9),
+            title,
+            description,
+            order_index
+          };
+          steps.push(newStep);
+          localStorage.setItem("mock_steps", JSON.stringify(steps));
+        }
+
+        showMsg("Passo criado com sucesso!", "success");
+        formStep.reset();
+        await loadData();
+      } catch (err) {
+        showMsg("Erro ao criar passo: " + err.message, "error");
+      }
+    });
+
+    // Ação: Adicionar Vídeo
+    formVideo.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const btnSubmit = document.getElementById("btn-submit-video");
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span class="spinner"></span> Adicionando...';
+
+      const step_id = selectStepEl.value;
+      const title = document.getElementById("video-title").value.trim();
+      const description = document.getElementById("video-desc").value.trim();
+      let storage_path = document.getElementById("video-path").value.trim();
+      const order_index = parseInt(document.getElementById("video-order").value);
+      const is_free = document.getElementById("video-is-free").checked;
+
+      const fileInput = document.getElementById("video-file-upload");
+      
+      try {
+        if (!step_id) {
+          throw new Error("Selecione um passo válido para este vídeo.");
+        }
+
+        // Lógica de upload real pro storage
+        if (isConfigured && fileInput && fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+          const filePath = `uploads/${fileName}`;
+
+          const { error: uploadErr } = await supabase.storage
+            .from("videos")
+            .upload(filePath, file);
+
+          if (uploadErr) throw uploadErr;
+          storage_path = filePath; // Salva o caminho relativo no banco
+        }
+
+        if (!storage_path) {
+          throw new Error("Envie um arquivo ou preencha o caminho/URL do vídeo.");
+        }
+
+        if (isConfigured) {
+          const { error } = await supabase
+            .from("videos")
+            .insert([{ step_id, title, description, storage_path, order_index, is_free }]);
+          if (error) throw error;
+        } else {
+          const newVideo = {
+            id: 'mock-video-' + Math.random().toString(36).substr(2, 9),
+            step_id,
+            title,
+            description,
+            storage_path,
+            order_index,
+            is_free
+          };
+          videos.push(newVideo);
+          localStorage.setItem("mock_videos", JSON.stringify(videos));
+        }
+
+        showMsg("Vídeo cadastrado com sucesso!", "success");
+        formVideo.reset();
+        await loadData();
+      } catch (err) {
+        showMsg("Erro ao salvar vídeo: " + err.message, "error");
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = "Adicionar Vídeo";
+      }
+    });
+
+    // Ação: Excluir Passo
+    async function deleteStep(id) {
+      if (!confirm("Tem certeza? Excluir este passo apagará permanentemente todos os vídeos associados a ele!")) return;
+
+      try {
+        if (isConfigured) {
+          const { error } = await supabase.from("steps").delete().eq("id", id);
+          if (error) throw error;
+        } else {
+          steps = steps.filter(s => s.id !== id);
+          localStorage.setItem("mock_steps", JSON.stringify(steps));
+          
+          // Apaga também os vídeos associados
+          videos = videos.filter(v => v.step_id !== id);
+          localStorage.setItem("mock_videos", JSON.stringify(videos));
+        }
+        showMsg("Passo excluído com sucesso!", "success");
+        await loadData();
+      } catch (err) {
+        showMsg("Erro ao excluir: " + err.message, "error");
+      }
+    }
+
+    // Ação: Excluir Vídeo
+    async function deleteVideo(id) {
+      if (!confirm("Tem certeza que deseja excluir esta aula?")) return;
+
+      try {
+        const videoToDelete = videos.find(v => v.id === id);
+
+        if (isConfigured) {
+          // Tenta apagar arquivo do Storage se for um caminho interno
+          if (videoToDelete && videoToDelete.storage_path.startsWith("uploads/")) {
+            await supabase.storage.from("videos").remove([videoToDelete.storage_path]);
+          }
+
+          const { error } = await supabase.from("videos").delete().eq("id", id);
+          if (error) throw error;
+        } else {
+          videos = videos.filter(v => v.id !== id);
+          localStorage.setItem("mock_videos", JSON.stringify(videos));
+        }
+        showMsg("Vídeo excluído com sucesso!", "success");
+        await loadData();
+      } catch (err) {
+        showMsg("Erro ao excluir vídeo: " + err.message, "error");
+      }
+    }
+
+    // Mensagens de Feedback
+    function showMsg(text, type) {
+      msgContainer.innerHTML = `
+        <div class="form-message ${type}">
+          ${text}
+        </div>
+      `;
+      // Auto-oculta após 4s
+      setTimeout(() => {
+        msgContainer.innerHTML = "";
+      }, 4000);
+    }
+
+    // Tabs do painel
+    tabStepsBtn.addEventListener("click", () => {
+      tabStepsBtn.classList.add("active");
+      tabVideosBtn.classList.remove("active");
+      sectionSteps.classList.remove("hidden");
+      sectionVideos.classList.add("hidden");
+    });
+
+    tabVideosBtn.addEventListener("click", () => {
+      tabStepsBtn.classList.remove("active");
+      tabVideosBtn.classList.add("active");
+      sectionSteps.classList.add("hidden");
+      sectionVideos.classList.remove("hidden");
+    });
+
+    checkAdminAuth();
+  </script>
+</body>
+</html>

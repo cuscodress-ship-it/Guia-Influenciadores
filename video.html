@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Player de Vídeo — Guia para Influenciadoras</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', var(--font-base);
+      background: #000;
+      color: #fff;
+    }
+    .screen {
+      background: #000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+      border-bottom: none;
+      color: #fff;
+      position: absolute;
+      width: 100%;
+      top: 0;
+      z-index: 30;
+    }
+    .video-container-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .video-card {
+      border-radius: 0;
+      height: 100vh;
+      aspect-ratio: 9/16;
+      max-height: 100vh;
+      width: auto;
+    }
+    @media (min-width: 480px) {
+      .video-card {
+        border-radius: var(--radius-lg);
+        height: calc(100vh - 40px);
+        margin: 20px 0;
+      }
+    }
+    /* Botões flutuantes laterais estilo Reels/TikTok */
+    .floating-actions {
+      position: absolute;
+      right: var(--space-4);
+      bottom: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      z-index: 25;
+      pointer-events: auto;
+    }
+    .action-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .action-button:active {
+      transform: scale(0.9);
+    }
+    .action-button.active {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: white;
+    }
+    .action-button__label {
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      margin-top: 2px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+    .action-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    /* Barra de Progresso Customizada */
+    .progress-bar-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      z-index: 28;
+      cursor: pointer;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--color-accent);
+      transition: width 0.1s linear;
+    }
+    /* Bloqueio de Acesso */
+    .lock-screen-wrapper {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-5);
+    }
+    .lock-box {
+      text-align: center;
+      background: #1c1b1f;
+      border: 1px solid #2c2b30;
+      border-radius: var(--radius-lg);
+      padding: var(--space-6) var(--space-5);
+      max-width: 340px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body class="no-nav">
+
+  <div class="screen">
+    
+    <!-- Topbar flutuante -->
+    <div class="topbar">
+      <a href="area-de-membros.html" class="topbar__back" id="back-btn">← Voltar</a>
+      <div class="topbar__title" id="lesson-index-title">Aula</div>
+    </div>
+
+    <!-- Container do Vídeo -->
+    <div class="video-container-wrapper">
+      
+      <!-- Box de Bloqueio (Premium) -->
+      <div class="lock-screen-wrapper hidden" id="lock-screen">
+        <div class="lock-box">
+          <span style="font-size: 48px; display:block; margin-bottom: var(--space-3);">👑</span>
+          <h3 style="font-weight: 800; font-size: 20px; color:#fff; margin-bottom: var(--space-2);">Conteúdo Exclusivo</h3>
+          <p class="text-muted" style="font-size:14px; margin-bottom: var(--space-5);">
+            Esta aula pertence ao <strong>Plano Pro</strong>. Faça um upgrade no seu perfil para liberar acesso a todo o manual.
+          </p>
+          <a href="area-de-membros.html" class="btn btn-primary">Voltar e Mudar Plano</a>
+        </div>
+      </div>
+
+      <!-- Card do Vídeo Vertical -->
+      <div class="video-card" id="video-card-element">
+        
+        <video id="main-video" playsinline webkit-playsinline></video>
+        
+        <!-- Controles/Informações sobrepostas -->
+        <div class="video-card__overlay">
+          <h3 id="video-title" style="font-size: 20px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-bottom: var(--space-2);">Título da Aula</h3>
+          <p id="video-desc" style="font-size: 13px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); max-width: 85%; line-height: 1.4;">Descrição da aula</p>
+        </div>
+
+        <!-- Botões de Ação na Lateral Direita -->
+        <div class="floating-actions">
+          <!-- Curtir -->
+          <div class="action-item">
+            <button class="action-button" id="btn-like">❤️</button>
+            <span class="action-button__label" id="like-label">Gostei</span>
+          </div>
+          
+          <!-- Concluído -->
+          <div class="action-item">
+            <button class="action-button" id="btn-complete">✓</button>
+            <span class="action-button__label" id="complete-label">Concluir</span>
+          </div>
+
+          <!-- Próximo -->
+          <div class="action-item">
+            <button class="action-button" id="btn-next-lesson">➔</button>
+            <span class="action-button__label">Próxima</span>
+          </div>
+        </div>
+
+        <!-- Barra de Progresso no rodapé do vídeo -->
+        <div class="progress-bar-container" id="progress-container">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { isConfigured, supabase } from "./assets/js/supabaseClient.js";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = urlParams.get("id");
+
+    const videoEl = document.getElementById("main-video");
+    const videoTitleEl = document.getElementById("video-title");
+    const videoDescEl = document.getElementById("video-desc");
+    const lessonIndexTitle = document.getElementById("lesson-index-title");
+    
+    const lockScreen = document.getElementById("lock-screen");
+    const btnLike = document.getElementById("btn-like");
+    const btnComplete = document.getElementById("btn-complete");
+    const btnNext = document.getElementById("btn-next-lesson");
+    
+    const progressFill = document.getElementById("progress-fill");
+    const progressContainer = document.getElementById("progress-container");
+
+    let currentUser = null;
+    let currentVideo = null;
+    let allVideos = [];
+
+    // Carregar informações de autenticação e conteúdo
+    async function initPlayer() {
+      if (!videoId) {
+        window.location.href = "area-de-membros.html";
+        return;
+      }
+
+      if (isConfigured) {
+        // Auth real
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = "entrar.html";
+          return;
+        }
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+        currentUser = profile;
+      } else {
+        // Auth mock
+        const sessionUser = localStorage.getItem("mock_session_user");
+        if (!sessionUser) {
+          window.location.href = "entrar.html";
+          return;
+        }
+        currentUser = JSON.parse(sessionUser);
+      }
+
+      await loadVideoData();
+    }
+
+    // Carrega dados do vídeo
+    async function loadVideoData() {
+      try {
+        if (isConfigured) {
+          // Busca todos os vídeos para ordenação e próximo
+          const { data: videos } = await supabase
+            .from("videos")
+            .select("*")
+            .order("order_index", { ascending: true });
+          
+          allVideos = videos || [];
+          currentVideo = allVideos.find(v => v.id === videoId);
+        } else {
+          // Busca mock
+          allVideos = JSON.parse(localStorage.getItem("mock_videos") || "[]");
+          currentVideo = allVideos.find(v => v.id === videoId);
+        }
+
+        if (!currentVideo) {
+          alert("Vídeo não encontrado.");
+          window.location.href = "area-de-membros.html";
+          return;
+        }
+
+        // Valida plano do usuário
+        const isUserPro = currentUser.plan === "pro" || currentUser.is_admin;
+        if (!currentVideo.is_free && !isUserPro) {
+          lockScreen.classList.remove("hidden");
+          return;
+        }
+
+        // Configura metadados na tela
+        videoTitleEl.textContent = currentVideo.title;
+        videoDescEl.textContent = currentVideo.description || "";
+        
+        // Define índice da aula
+        const stepVideos = allVideos.filter(v => v.step_id === currentVideo.step_id);
+        const currentIndex = stepVideos.findIndex(v => v.id === currentVideo.id);
+        lessonIndexTitle.textContent = `Aula ${currentIndex + 1} de ${stepVideos.length}`;
+
+        // Carrega Fonte do Vídeo.
+        // Se storage_path já é um caminho/URL direto (ex: "assets/video/x.mp4"
+        // ou "https://..."), usamos ele direto — só pedimos URL assinada do
+        // Supabase Storage quando é apenas o nome do arquivo no bucket.
+        const isDirectPath = currentVideo.storage_path.includes("/");
+
+        if (isConfigured && !isDirectPath) {
+          // Solicita URL assinada temporária para o bucket privado
+          const { data, error } = await supabase.storage
+            .from("videos")
+            .createSignedUrl(currentVideo.storage_path, 3600); // Válido por 1 hora
+
+          if (error) throw error;
+          videoEl.src = data.signedUrl;
+        } else {
+          // Caminho direto (mock ou arquivo hospedado no próprio site)
+          videoEl.src = currentVideo.storage_path;
+        }
+
+        setupControls();
+        checkUserInteractions();
+
+        // Autoplay
+        videoEl.play().catch(err => {
+          console.log("Autoplay bloqueado pelo navegador, aguardando clique do usuário.");
+          // Adiciona dica visual se necessário
+        });
+
+      } catch (err) {
+        alert("Erro ao inicializar vídeo: " + err.message);
+      }
+    }
+
+    // Configura botões de controle e eventos
+    function setupControls() {
+      // Tap para Play / Pause no vídeo
+      videoEl.addEventListener("click", () => {
+        if (videoEl.paused) {
+          videoEl.play();
+        } else {
+          videoEl.focus();
+          videoEl.pause();
+        }
+      });
+
+      // Atualiza barra de progresso
+      videoEl.addEventListener("timeupdate", () => {
+        const pct = (videoEl.currentTime / videoEl.duration) * 100 || 0;
+        progressFill.style.width = `${pct}%`;
+      });
+
+      // Clique na barra de progresso para avançar/retroceder
+      progressContainer.addEventListener("click", (e) => {
+        const rect = progressContainer.getBoundingClientRect();
+        const pos = (e.clientX - rect.left) / rect.width;
+        videoEl.currentTime = pos * videoEl.duration;
+      });
+
+      // Botão de Curtir
+      btnLike.addEventListener("click", () => {
+        const likes = JSON.parse(localStorage.getItem("user_liked_videos") || "[]");
+        const idx = likes.indexOf(currentVideo.id);
+        if (idx === -1) {
+          likes.push(currentVideo.id);
+          btnLike.classList.add("active");
+          btnLike.innerHTML = "❤️";
+        } else {
+          likes.splice(idx, 1);
+          btnLike.classList.remove("active");
+          btnLike.innerHTML = "🤍";
+        }
+        localStorage.setItem("user_liked_videos", JSON.stringify(likes));
+      });
+
+      // Botão de Concluir Aula
+      btnComplete.addEventListener("click", () => {
+        toggleCompleteState();
+      });
+
+      // Próxima Aula
+      btnNext.addEventListener("click", () => {
+        navigateToNextVideo();
+      });
+
+      // Quando o vídeo acabar, marca como concluído e avança após 1s
+      videoEl.addEventListener("ended", () => {
+        markComplete(true);
+        setTimeout(() => {
+          navigateToNextVideo();
+        }, 1200);
+      });
+    }
+
+    // Gerencia estado de concluído
+    function toggleCompleteState() {
+      const completed = JSON.parse(localStorage.getItem("user_completed_videos") || "[]");
+      const idx = completed.indexOf(currentVideo.id);
+      if (idx === -1) {
+        completed.push(currentVideo.id);
+        btnComplete.classList.add("active");
+        btnComplete.style.background = "var(--color-success)";
+        btnComplete.style.borderColor = "var(--color-success)";
+      } else {
+        completed.splice(idx, 1);
+        btnComplete.classList.remove("active");
+        btnComplete.style.background = "";
+        btnComplete.style.borderColor = "";
+      }
+      localStorage.setItem("user_completed_videos", JSON.stringify(completed));
+    }
+
+    function markComplete(state) {
+      const completed = JSON.parse(localStorage.getItem("user_completed_videos") || "[]");
+      const idx = completed.indexOf(currentVideo.id);
+      if (state && idx === -1) {
+        completed.push(currentVideo.id);
+        btnComplete.classList.add("active");
+        btnComplete.style.background = "var(--color-success)";
+        btnComplete.style.borderColor = "var(--color-success)";
+      }
+      localStorage.setItem("user_completed_videos", JSON.stringify(completed));
+    }
+
+    // Verifica interações salvas (Curtidas e Concluídas)
+    function checkUserInteractions() {
+      const likes = JSON.parse(localStorage.getItem("user_liked_videos") || "[]");
+      if (likes.includes(currentVideo.id)) {
+        btnLike.classList.add("active");
+        btnLike.innerHTML = "❤️";
+      } else {
+        btnLike.innerHTML = "🤍";
+      }
+
+      const completed = JSON.parse(localStorage.getItem("user_completed_videos") || "[]");
+      if (completed.includes(currentVideo.id)) {
+        btnComplete.classList.add("active");
+        btnComplete.style.background = "var(--color-success)";
+        btnComplete.style.borderColor = "var(--color-success)";
+      } else {
+        btnComplete.style.background = "";
+        btnComplete.style.borderColor = "";
+      }
+    }
+
+    // Lógica para avançar para a próxima aula
+    function navigateToNextVideo() {
+      // Filtra vídeos do mesmo passo ordenados
+      const stepVideos = allVideos
+        .filter(v => v.step_id === currentVideo.step_id)
+        .sort((a,b) => a.order_index - b.order_index);
+      
+      const currentIndex = stepVideos.findIndex(v => v.id === currentVideo.id);
+      
+      if (currentIndex < stepVideos.length - 1) {
+        // Tem próxima aula no mesmo passo
+        const nextVideo = stepVideos[currentIndex + 1];
+        window.location.href = `video.html?id=${nextVideo.id}`;
+      } else {
+        // Acabou o passo. Vamos ver se tem um próximo passo
+        let allSteps = [];
+        if (isConfigured) {
+          // No modo Supabase, teríamos que buscar steps. Para simplificar, voltamos para a área de membros
+          window.location.href = "area-de-membros.html";
+        } else {
+          allSteps = JSON.parse(localStorage.getItem("mock_steps") || "[]").sort((a,b) => a.order_index - b.order_index);
+          const currentStepIndex = allSteps.findIndex(s => s.id === currentVideo.step_id);
+          
+          if (currentStepIndex < allSteps.length - 1) {
+            // Ir para o primeiro vídeo do próximo passo
+            const nextStep = allSteps[currentStepIndex + 1];
+            const nextStepVideos = allVideos
+              .filter(v => v.step_id === nextStep.id)
+              .sort((a,b) => a.order_index - b.order_index);
+            
+            if (nextStepVideos.length > 0) {
+              window.location.href = `video.html?id=${nextStepVideos[0].id}`;
+            } else {
+              window.location.href = "area-de-membros.html";
+            }
+          } else {
+            // Fim de todo o curso!
+            alert("🎉 Parabéns! Você concluiu todas as aulas do Guia para Influenciadoras!");
+            window.location.href = "area-de-membros.html";
+          }
+        }
+      }
+    }
+
+    initPlayer();
+  </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Cadastrar — Guia para Influenciadoras</title>
+  <meta name="description" content="Crie sua conta para acessar o guia completo de redes sociais.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', var(--font-base);
+    }
+  </style>
+</head>
+<body class="no-nav">
+
+  <div class="screen">
+    
+    <!-- Topbar -->
+    <div class="topbar">
+      <a href="index.html" class="topbar__back" id="back-link">←</a>
+      <div class="topbar__title">Criar nova conta</div>
+    </div>
+
+    <!-- Container do Formulário -->
+    <div class="container">
+      <div class="stack" style="gap: var(--space-5);">
+        
+        <div>
+          <h2 style="font-weight: 800; font-size: 24px; margin-bottom: var(--space-1);">Cadastre-se</h2>
+          <p class="text-muted" style="font-size: 14px;">Preencha os dados abaixo para criar o seu acesso.</p>
+        </div>
+
+        <div id="message-container"></div>
+
+        <form id="register-form" class="stack" style="gap: var(--space-4);">
+          <div class="field">
+            <label for="name">SEU NOME</label>
+            <input type="text" id="name" required placeholder="Ex: Júlia Ramos">
+          </div>
+
+          <div class="field">
+            <label for="email">E-MAIL</label>
+            <input type="email" id="email" required placeholder="Ex: julia@exemplo.com">
+          </div>
+
+          <div class="field">
+            <label for="password">SENHA</label>
+            <input type="password" id="password" required minlength="6" placeholder="Mínimo 6 caracteres">
+          </div>
+
+          <div class="field" id="mock-admin-field" style="display: none; background: var(--color-locked); padding: var(--space-3); border-radius: var(--radius-md); border: 1px dashed var(--color-border);">
+            <label style="display:flex; align-items:center; gap:var(--space-2); cursor:pointer; margin-bottom:0;">
+              <input type="checkbox" id="make-admin" checked style="width:18px; min-height:18px; margin:0;">
+              <span>Criar conta como <strong>Administrador</strong></span>
+            </label>
+            <p class="text-muted" style="font-size: 11px; margin: 4px 0 0 26px;">Permite acessar o painel de criação de aulas/passos.</p>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-submit">
+            <span id="btn-text">Criar Minha Conta</span>
+          </button>
+        </form>
+
+        <div class="text-center" style="margin-top: var(--space-3);">
+          <p class="text-muted" style="font-size: 14px;">
+            Já tem uma conta? <a href="entrar.html" style="color: var(--color-accent); font-weight: 600;">Fazer login</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { isConfigured, supabase } from "./assets/js/supabaseClient.js";
+    import { warnIfNotConfigured } from "./assets/js/auth.js";
+
+    warnIfNotConfigured();
+
+    const form = document.getElementById("register-form");
+    const msgContainer = document.getElementById("message-container");
+    const btnSubmit = document.getElementById("btn-submit");
+    const btnText = document.getElementById("btn-text");
+    const mockAdminField = document.getElementById("mock-admin-field");
+    const makeAdminCheckbox = document.getElementById("make-admin");
+
+    // Mostra opção de Admin no cadastro se estiver no Modo Mock
+    if (!isConfigured) {
+      mockAdminField.style.display = "block";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
+      
+      // Feedback visual de carregando
+      btnSubmit.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span> Registrando...';
+      msgContainer.innerHTML = "";
+
+      try {
+        if (isConfigured) {
+          // Registro real no Supabase
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                name: name
+              }
+            }
+          });
+
+          if (error) throw error;
+
+          // Sucesso
+          msgContainer.innerHTML = `
+            <div class="form-message success">
+              Conta criada! Verifique seu e-mail para confirmar a conta, depois faça o login.
+            </div>
+          `;
+          form.reset();
+        } else {
+          // Registro simulado (Modo Mock)
+          let users = JSON.parse(localStorage.getItem("mock_users") || "[]");
+          
+          if (users.find(u => u.email === email)) {
+            throw new Error("Este e-mail já está cadastrado no modo de demonstração.");
+          }
+
+          const isAdmin = makeAdminCheckbox.checked;
+          const newUser = {
+            id: 'mock-uuid-' + Math.random().toString(36).substr(2, 9),
+            name,
+            email,
+            is_admin: isAdmin,
+            plan: 'free',
+            created_at: new Date().toISOString()
+          };
+
+          users.push(newUser);
+          localStorage.setItem("mock_users", JSON.stringify(users));
+
+          // Loga automaticamente o novo usuário
+          localStorage.setItem("mock_session_user", JSON.stringify(newUser));
+
+          msgContainer.innerHTML = `
+            <div class="form-message success">
+              Registro simulado com sucesso! Redirecionando...
+            </div>
+          `;
+
+          setTimeout(() => {
+            window.location.href = "area-de-membros.html";
+          }, 1500);
+        }
+      } catch (err) {
+        msgContainer.innerHTML = `
+          <div class="form-message error">
+            ${err.message || "Ocorreu um erro ao cadastrar."}
+          </div>
+        `;
+      } finally {
+        btnSubmit.disabled = false;
+        btnText.textContent = "Criar Minha Conta";
+      }
+    });
+  </script>
+</body>
+</html>

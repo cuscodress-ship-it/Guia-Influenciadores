@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Entrar — Guia para Influenciadoras</title>
+  <meta name="description" content="Acesse sua área de membros para ver as aulas.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', var(--font-base);
+    }
+    .demo-helpers {
+      background: var(--color-locked);
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+    .demo-helpers h4 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: var(--space-2);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .demo-helpers__btns {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+  </style>
+</head>
+<body class="no-nav">
+
+  <div class="screen">
+    
+    <!-- Topbar -->
+    <div class="topbar">
+      <a href="index.html" class="topbar__back" id="back-link">←</a>
+      <div class="topbar__title">Login</div>
+    </div>
+
+    <!-- Container do Formulário -->
+    <div class="container">
+      <div class="stack" style="gap: var(--space-5);">
+        
+        <div>
+          <h2 style="font-weight: 800; font-size: 24px; margin-bottom: var(--space-1);">Bem-vinda de volta</h2>
+          <p class="text-muted" style="font-size: 14px;">Entre com seus dados para acessar o conteúdo.</p>
+        </div>
+
+        <div id="message-container"></div>
+
+        <!-- Atalhos do Modo Demo (só visível no Modo Mock) -->
+        <div class="demo-helpers" id="demo-helpers-box" style="display: none;">
+          <h4>⚡ Atalhos de Demonstração</h4>
+          <p class="text-muted" style="font-size: 11px; margin-bottom: var(--space-3);">Use os botões abaixo para entrar instantaneamente sem precisar criar conta.</p>
+          <div class="demo-helpers__btns">
+            <button type="button" class="btn btn-secondary" id="btn-login-demo-admin" style="min-height: 40px; font-size: 13px;">
+              Entrar como <strong>Administrador (Demo)</strong>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-login-demo-user" style="min-height: 40px; font-size: 13px; margin-top: 4px;">
+              Entrar como <strong>Influenciadora (Demo)</strong>
+            </button>
+          </div>
+        </div>
+
+        <form id="login-form" class="stack" style="gap: var(--space-4);">
+          <div class="field">
+            <label for="email">E-MAIL</label>
+            <input type="email" id="email" required placeholder="Ex: julia@exemplo.com">
+          </div>
+
+          <div class="field">
+            <label for="password">SENHA</label>
+            <input type="password" id="password" required placeholder="Digite sua senha">
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-submit">
+            <span id="btn-text">Entrar</span>
+          </button>
+        </form>
+
+        <div class="text-center" style="margin-top: var(--space-3);">
+          <p class="text-muted" style="font-size: 14px;">
+            Ainda não tem conta? <a href="cadastro.html" style="color: var(--color-accent); font-weight: 600;">Criar uma conta</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { isConfigured, supabase } from "./assets/js/supabaseClient.js";
+    import { warnIfNotConfigured } from "./assets/js/auth.js";
+
+    warnIfNotConfigured();
+
+    const form = document.getElementById("login-form");
+    const msgContainer = document.getElementById("message-container");
+    const btnSubmit = document.getElementById("btn-submit");
+    const btnText = document.getElementById("btn-text");
+    const demoHelpersBox = document.getElementById("demo-helpers-box");
+
+    // Lógica para mostrar os helpers de demo
+    if (!isConfigured) {
+      demoHelpersBox.style.display = "block";
+      
+      document.getElementById("btn-login-demo-admin").addEventListener("click", () => {
+        loginMockUser(true);
+      });
+      document.getElementById("btn-login-demo-user").addEventListener("click", () => {
+        loginMockUser(false);
+      });
+    }
+
+    function loginMockUser(isAdmin) {
+      const mockUser = {
+        id: isAdmin ? 'mock-admin-id' : 'mock-user-id',
+        name: isAdmin ? 'Admin de Testes' : 'Mariana Silva',
+        email: isAdmin ? 'admin@plataforma.com' : 'mariana@influencer.com',
+        is_admin: isAdmin,
+        plan: isAdmin ? 'pro' : 'free',
+        created_at: new Date().toISOString()
+      };
+      
+      localStorage.setItem("mock_session_user", JSON.stringify(mockUser));
+      msgContainer.innerHTML = `<div class="form-message success">Entrando como ${mockUser.name}...</div>`;
+      
+      setTimeout(() => {
+        window.location.href = "area-de-membros.html";
+      }, 800);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
+      
+      btnSubmit.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span> Verificando...';
+      msgContainer.innerHTML = "";
+
+      try {
+        if (isConfigured) {
+          // Login real com Supabase
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+
+          if (error) throw error;
+
+          msgContainer.innerHTML = `<div class="form-message success">Login bem-sucedido! Redirecionando...</div>`;
+          setTimeout(() => {
+            window.location.href = "area-de-membros.html";
+          }, 1000);
+        } else {
+          // Login simulado (Modo Mock)
+          const users = JSON.parse(localStorage.getItem("mock_users") || "[]");
+          const foundUser = users.find(u => u.email === email);
+
+          // Simulando verificação simples
+          if (!foundUser) {
+            throw new Error("Usuário não cadastrado nesta demonstração. Crie uma conta ou use os botões de atalho no topo.");
+          }
+
+          // Salva sessão localmente
+          localStorage.setItem("mock_session_user", JSON.stringify(foundUser));
+          msgContainer.innerHTML = `<div class="form-message success">Login simulado com sucesso! Redirecionando...</div>`;
+          
+          setTimeout(() => {
+            window.location.href = "area-de-membros.html";
+          }, 1000);
+        }
+      } catch (err) {
+        msgContainer.innerHTML = `
+          <div class="form-message error">
+            ${err.message || "E-mail ou senha incorretos."}
+          </div>
+        `;
+      } finally {
+        btnSubmit.disabled = false;
+        btnText.textContent = "Entrar";
+      }
+    });
+  </script>
+</body>
+</html>

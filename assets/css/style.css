@@ -1,0 +1,443 @@
+/* ============================================================
+   Design base — mobile-first, pensado para vídeos verticais.
+   Tudo é construído primeiro para celular; @media min-width
+   apenas "estica" o layout em telas maiores.
+   ============================================================ */
+
+:root {
+  /* Cores — identidade rosa bebê */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #6b6b6b;
+  --color-border: #f8dce6;
+  --color-accent: #f492b4;
+  --color-accent-ink: #1a1a1a;
+  --color-accent-soft: #fce0ea;
+  --color-locked: #fbeef2;
+  --color-success: #1fa672;
+
+  /* Tipografia */
+  --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Espaçamento */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Formas */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Camadas fixas (bottom nav / topo) */
+  --bottom-nav-height: 64px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom));
+}
+
+body.no-nav {
+  padding-bottom: 0;
+}
+
+img, video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1, h2, h3, p {
+  margin: 0 0 var(--space-3);
+}
+
+/* Container central, sempre com cara de "tela de celular" mesmo no desktop */
+.screen {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--color-bg);
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .screen {
+    min-height: 100vh;
+    border-left: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.container {
+  padding: var(--space-5) var(--space-4);
+}
+
+/* Topo fixo simples */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.topbar__back {
+  font-size: 20px;
+  line-height: 1;
+  padding: var(--space-2);
+  margin: calc(var(--space-2) * -1);
+}
+
+.topbar__title {
+  font-weight: 600;
+  font-size: 16px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Marca / logo */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.brand__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* Botões */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-accent);
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Formulários */
+.field {
+  margin-bottom: var(--space-4);
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.field textarea {
+  min-height: 100px;
+  padding: var(--space-3) var(--space-4);
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.form-message {
+  font-size: 14px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+}
+
+.form-message.error {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.form-message.success {
+  background: color-mix(in srgb, var(--color-success) 15%, transparent);
+  color: var(--color-success);
+}
+
+/* Card de vídeo vertical (estilo "story/reels") */
+.video-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #000;
+}
+
+.video-card video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-card__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-5);
+  background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.75) 100%);
+  color: #fff;
+  pointer-events: none;
+}
+
+.video-card__overlay h3 {
+  color: #fff;
+  font-size: 17px;
+}
+
+.video-card__overlay p {
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  margin: 0;
+}
+
+.video-card__lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  text-align: center;
+  padding: var(--space-4);
+}
+
+/* Guia: seções e itens */
+.step-section {
+  margin-bottom: var(--space-6);
+}
+
+.step-section__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.step-section__index {
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.step-section__title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.step-section__desc {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  margin-bottom: var(--space-4);
+}
+
+.video-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+}
+
+.video-tile {
+  flex: 1 1 140px;
+  max-width: 220px;
+}
+
+.video-tile .video-card {
+  aspect-ratio: 9 / 16;
+  margin-bottom: var(--space-2);
+}
+
+.video-tile__title {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Selo "grátis" / "em breve" */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.badge-free {
+  background: color-mix(in srgb, var(--color-success) 15%, transparent);
+  color: var(--color-success);
+}
+
+.badge-locked {
+  background: var(--color-locked);
+  color: var(--color-text-muted);
+}
+
+/* Bottom nav fixo (estilo app mobile) */
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: 100%;
+  max-width: 480px;
+  height: calc(var(--bottom-nav-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  z-index: 20;
+}
+
+.bottom-nav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.bottom-nav__item.active {
+  color: var(--color-accent);
+}
+
+.bottom-nav__icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* Utilitários */
+.text-center { text-align: center; }
+.text-muted { color: var(--color-text-muted); }
+.stack { display: flex; flex-direction: column; gap: var(--space-3); }
+.mt-6 { margin-top: var(--space-6); }
+.mb-0 { margin-bottom: 0; }
+.hidden { display: none !important; }
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-7) var(--space-4);
+  color: var(--color-text-muted);
+}

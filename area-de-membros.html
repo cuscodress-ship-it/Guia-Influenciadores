@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Área de Membros — Guia para Influenciadoras</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', var(--font-base);
+    }
+    .user-banner {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-5) var(--space-4) var(--space-4);
+    }
+    .user-banner__greet {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      margin-bottom: 2px;
+    }
+    .user-banner__name {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0;
+    }
+    .user-banner__plan {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      margin-top: var(--space-2);
+    }
+    .mock-warning-banner {
+      background: linear-gradient(90deg, #e64980 0%, #f492b4 100%);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+    /* Estilos extras para a aba de Perfil */
+    .profile-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      text-align: center;
+    }
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--color-accent-soft);
+      color: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0 auto var(--space-3);
+      border: 3px solid var(--color-border);
+    }
+    .plan-selector-box {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-top: var(--space-4);
+    }
+    .plan-selector-box h4 {
+      font-size: 14px;
+      margin-bottom: var(--space-2);
+    }
+    .plan-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-2) 0;
+      cursor: pointer;
+    }
+    .plan-option input {
+      width: 18px;
+      height: 18px;
+    }
+    .video-thumbnail-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1c1b1f 0%, #2d2b33 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      position: relative;
+    }
+    .play-btn-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      transition: transform 0.2s ease;
+      z-index: 2;
+    }
+    .video-card:hover .play-btn-circle {
+      transform: scale(1.1);
+      background: var(--color-accent);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen" id="root-screen">
+    
+    <!-- Banner do Modo Demo -->
+    <div id="mock-banner" class="mock-warning-banner" style="display: none;">
+      <span>✨ Modo de Demonstração (Sem Supabase)</span>
+    </div>
+
+    <!-- ABA 1: CONTEÚDO (GUIA) -->
+    <div id="tab-guia-view">
+      <!-- Boas-vindas -->
+      <div class="user-banner">
+        <div class="user-banner__greet">Olá, bem-vinda de volta!</div>
+        <h2 class="user-banner__name" id="user-display-name">Carregando...</h2>
+        <div class="user-banner__plan" id="user-display-plan">Plano...</div>
+      </div>
+
+      <!-- Container do Guia -->
+      <div class="container" style="padding-top: var(--space-4);">
+        <div id="steps-container" class="stack" style="gap: var(--space-5);">
+          <!-- Spinner de Carregamento -->
+          <div class="text-center" style="padding: var(--space-6) 0;" id="loading-spinner">
+            <span class="spinner" style="border-top-color: var(--color-accent); width:32px; height:32px;"></span>
+            <p class="text-muted mt-2" style="font-size:14px;">Carregando aulas...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 2: PERFIL -->
+    <div id="tab-perfil-view" class="hidden">
+      <div class="container stack" style="gap: var(--space-4); padding-top: var(--space-6);">
+        <div class="profile-card">
+          <div class="profile-avatar" id="profile-avatar-initials">U</div>
+          <h3 id="profile-name" style="margin-bottom: var(--space-1); font-weight:800;">Nome do Usuário</h3>
+          <p id="profile-email" class="text-muted" style="font-size:14px; margin-bottom:0;">email@exemplo.com</p>
+        </div>
+
+        <div class="plan-selector-box">
+          <h4>👑 Configuração da Conta</h4>
+          <p class="text-muted" style="font-size: 12px; margin-bottom: var(--space-3);">
+            No modo de demonstração, alterne seu plano abaixo para testar o acesso aos vídeos bloqueados (Pro).
+          </p>
+          <div class="stack" style="gap: var(--space-2);">
+            <label class="plan-option">
+              <div>
+                <strong>Plano Gratuito</strong>
+                <div class="text-muted" style="font-size: 11px;">Acesso apenas aos conteúdos iniciais</div>
+              </div>
+              <input type="radio" name="plan-selector" id="plan-radio-free" value="free">
+            </label>
+            <hr style="border:0; border-top:1px solid var(--color-border); margin:0;">
+            <label class="plan-option">
+              <div>
+                <strong>Plano Pro 👑</strong>
+                <div class="text-muted" style="font-size: 11px;">Liberação total de todos os vídeos</div>
+              </div>
+              <input type="radio" name="plan-selector" id="plan-radio-pro" value="pro">
+            </label>
+          </div>
+        </div>
+
+        <div class="stack" style="gap: var(--space-3); margin-top: var(--space-5);">
+          <!-- Botão Admin, aparece apenas se is_admin = true -->
+          <a href="admin.html" class="btn btn-secondary hidden" id="admin-panel-link" style="border-color: var(--color-accent); color: var(--color-accent);">
+            🛠️ Acessar Painel Admin
+          </a>
+          <button id="btn-logout" class="btn btn-secondary" style="color: #e64980;">Sair da Conta</button>
+        </div>
+
+        <p class="text-center text-muted" style="font-size: 12px; margin-top: var(--space-5);">
+          Guia criado por <a href="https://instagram.com/juliaalouren" target="_blank" rel="noopener" style="color: var(--color-accent-ink); font-weight: 700;">@juliaalouren</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- NAV BAR INFERIOR -->
+    <nav class="bottom-nav">
+      <a href="#" class="bottom-nav__item active" id="nav-btn-guia">
+        <span class="bottom-nav__icon">🎬</span>
+        <span>Guia</span>
+      </a>
+      <a href="#" class="bottom-nav__item" id="nav-btn-perfil">
+        <span class="bottom-nav__icon">👤</span>
+        <span>Perfil</span>
+      </a>
+    </nav>
+
+  </div>
+
+  <script type="module">
+    import { isConfigured, supabase } from "./assets/js/supabaseClient.js";
+    import { warnIfNotConfigured } from "./assets/js/auth.js";
+
+    warnIfNotConfigured();
+
+    let currentUser = null;
+    let dbSteps = [];
+    let dbVideos = [];
+
+    // Deriva o caminho da capa a partir do vídeo, ex:
+    // "assets/video/storyselling.mp4" -> "assets/img/capa-storyselling.jpg"
+    function getThumbnailPath(storagePath) {
+      const filename = storagePath.split("/").pop().replace(/\.[^/.]+$/, "");
+      return `assets/img/capa-${filename}.jpg`;
+    }
+
+    // Redireciona se não houver login
+    async function checkAuthentication() {
+      if (isConfigured) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = "entrar.html";
+          return;
+        }
+        // Busca perfil no Supabase
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+        currentUser = profile;
+      } else {
+        // Modo mock
+        document.getElementById("mock-banner").style.display = "flex";
+        const sessionUser = localStorage.getItem("mock_session_user");
+        if (!sessionUser) {
+          window.location.href = "entrar.html";
+          return;
+        }
+        currentUser = JSON.parse(sessionUser);
+      }
+
+      setupInterface();
+      await loadContent();
+    }
+
+    // Configura a interface com os dados do usuário
+    function setupInterface() {
+      if (!currentUser) return;
+      
+      // Atualiza aba Guia
+      document.getElementById("user-display-name").textContent = currentUser.name || "Influenciadora";
+      
+      const planEl = document.getElementById("user-display-plan");
+      const isAdmin = currentUser.is_admin;
+      planEl.innerHTML = isAdmin ? "👑 Administrador" : (currentUser.plan === "pro" ? "⭐ Plano Pro" : "Plano Gratuito");
+      
+      // Atualiza aba Perfil
+      document.getElementById("profile-name").textContent = currentUser.name || "Influenciadora";
+      document.getElementById("profile-email").textContent = currentUser.email || "";
+      document.getElementById("profile-avatar-initials").textContent = (currentUser.name || "U").substring(0, 1).toUpperCase();
+
+      // Configura radio buttons do plano
+      if (currentUser.plan === "pro") {
+        document.getElementById("plan-radio-pro").checked = true;
+      } else {
+        document.getElementById("plan-radio-free").checked = true;
+      }
+
+      // Mostra painel admin se for administrador
+      if (isAdmin) {
+        document.getElementById("admin-panel-link").classList.remove("hidden");
+      } else {
+        document.getElementById("admin-panel-link").classList.add("hidden");
+      }
+    }
+
+    // Escuta mudança de plano (Modo Mock apenas)
+    document.getElementById("plan-radio-free").addEventListener("change", () => changePlanMock("free"));
+    document.getElementById("plan-radio-pro").addEventListener("change", () => changePlanMock("pro"));
+
+    function changePlanMock(newPlan) {
+      if (isConfigured) {
+        alert("Para mudar o plano no Supabase, altere a coluna 'plan' do seu perfil na tabela public.profiles.");
+        // Restaura valor
+        setupInterface();
+        return;
+      }
+      currentUser.plan = newPlan;
+      
+      // Atualiza no localStorage a sessão atual
+      localStorage.setItem("mock_session_user", JSON.stringify(currentUser));
+      
+      // Atualiza também na lista de usuários cadastrados
+      const users = JSON.parse(localStorage.getItem("mock_users") || "[]");
+      const index = users.findIndex(u => u.email === currentUser.email);
+      if (index !== -1) {
+        users[index].plan = newPlan;
+        localStorage.setItem("mock_users", JSON.stringify(users));
+      }
+      
+      setupInterface();
+      // Recarrega o conteúdo para reavaliar os cadeados
+      renderContent();
+    }
+
+    // Carrega dados das tabelas
+    async function loadContent() {
+      const container = document.getElementById("steps-container");
+      
+      try {
+        if (isConfigured) {
+          // Busca real
+          const { data: steps, error: stepErr } = await supabase
+            .from("steps")
+            .select("*")
+            .order("order_index", { ascending: true });
+          
+          if (stepErr) throw stepErr;
+          dbSteps = steps || [];
+
+          const { data: videos, error: videoErr } = await supabase
+            .from("videos")
+            .select("*")
+            .order("order_index", { ascending: true });
+          
+          if (videoErr) throw videoErr;
+          dbVideos = videos || [];
+        } else {
+          // Busca mock local
+          // Inicializa dados fictícios se vazios
+          initMockData();
+          dbSteps = JSON.parse(localStorage.getItem("mock_steps") || "[]");
+          dbVideos = JSON.parse(localStorage.getItem("mock_videos") || "[]");
+        }
+
+        renderContent();
+      } catch (err) {
+        container.innerHTML = `
+          <div class="form-message error">
+            Erro ao carregar conteúdo: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    const MOCK_SEED_VERSION = "3";
+
+    function initMockData() {
+      if (localStorage.getItem("mock_seed_version") === MOCK_SEED_VERSION) return;
+      localStorage.setItem("mock_seed_version", MOCK_SEED_VERSION);
+
+      const mockSteps = [
+        { id: "step-1", title: "Comece Por Aqui", description: "O alicerce para sua rede social dar certo antes de gravar o primeiro take.", order_index: 1 },
+        { id: "step-reels", title: "Passos Práticos para um Bom Reels", description: "O passo a passo completo para gravar um Reels do início ao fim.", order_index: 2 },
+        { id: "step-2", title: "Equipamentos e Estúdio", description: "Como organizar seu local de gravação usando o que você já tem em casa.", order_index: 3 },
+        { id: "step-3", title: "Luz e Câmera 9:16", description: "Configurando o celular para qualidade profissional e iluminando com perfeição.", order_index: 4 },
+        { id: "step-4", title: "Edição de Alto Impacto", description: "Técnicas de corte, legendagem e áudio para reter o telespectador até o final.", order_index: 5 }
+      ];
+
+      const mockVideos = [
+        // Passo 1
+        { id: "v-1", step_id: "step-1", title: "Boas-vindas e Manual do Guia", description: "Entenda o conceito por trás de vídeos de sucesso e como seguir este manual passo a passo.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-woman-recording-a-video-with-her-phone-41618-large.mp4", order_index: 1, is_free: true },
+        { id: "v-2", step_id: "step-1", title: "Definindo seu Nicho Visual", description: "Encontre a identidade visual, cores e estilo que diferenciam seu perfil dos concorrentes.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-creative-workspace-with-computer-and-plants-43560-large.mp4", order_index: 2, is_free: true },
+
+        // Passo Reels
+        { id: "v-reels-1", step_id: "step-reels", title: "Passo a Passo de um Reels", description: "O passo a passo completo, do roteiro à gravação, para montar um bom Reels.", storage_path: "assets/video/passo-a-passo-reels.mp4", order_index: 1, is_free: true },
+
+        // Passo 2
+        { id: "v-3", step_id: "step-2", title: "Montando Cenário com Baixo Custo", description: "Como criar fundos atraentes e estéticos em qualquer cômodo da sua casa sem gastar quase nada.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-creative-workspace-with-computer-and-plants-43560-large.mp4", order_index: 1, is_free: true },
+        { id: "v-4", step_id: "step-2", title: "Microfones de Lapela de Entrada", description: "Qualidade de áudio é 50% do seu vídeo. Conheça lapelas baratas e eficazes para smartphone.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-spinning-studio-microphone-43577-large.mp4", order_index: 2, is_free: true },
+        
+        // Passo 3
+        { id: "v-5", step_id: "step-3", title: "Luz de Janela e Iluminação Caseira", description: "Aprenda a se posicionar em relação ao sol e montar uma iluminação de três pontos com luminárias comuns.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-light-recording-with-smartphone-42475-large.mp4", order_index: 1, is_free: true },
+        { id: "v-6", step_id: "step-3", title: "Resolução do Celular para TikTok/Reels", description: "Dicas essenciais de ajuste de FPS, resolução 1080p e limpeza de lente no Android e iOS.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-woman-recording-a-video-with-her-phone-41618-large.mp4", order_index: 2, is_free: true },
+        { id: "v-7", step_id: "step-3", title: "Segredos do Enquadramento Vertical", description: "Fique na posição exata! Como usar a regra dos terços e margens de segurança para textos na tela.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-light-recording-with-smartphone-42475-large.mp4", order_index: 3, is_free: false },
+        
+        // Passo 4
+        { id: "v-8", step_id: "step-4", title: "Corte Seco e Dinâmica de Tela", description: "Como acelerar sua aula tirando pausas para respiração e mantendo o espectador hipnotizado no CapCut.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-creative-workspace-with-computer-and-plants-43560-large.mp4", order_index: 1, is_free: true },
+        { id: "v-9", step_id: "step-4", title: "Legendas Dinâmicas que Engajam", description: "Como inserir blocos de texto coloridos de forma automática e estratégica usando inteligência artificial.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-woman-recording-a-video-with-her-phone-41618-large.mp4", order_index: 2, is_free: false },
+        { id: "v-10", step_id: "step-4", title: "Trilha Sonora e Efeitos de Áudio", description: "Adicionando sons sutis (woosh, pop, click) para destacar elementos visuais importantes.", storage_path: "https://assets.mixkit.co/videos/preview/mixkit-spinning-studio-microphone-43577-large.mp4", order_index: 3, is_free: false }
+      ];
+
+      localStorage.setItem("mock_steps", JSON.stringify(mockSteps));
+      localStorage.setItem("mock_videos", JSON.stringify(mockVideos));
+    }
+
+    // Renderiza a lista de passos e vídeos
+    function renderContent() {
+      const container = document.getElementById("steps-container");
+      container.innerHTML = "";
+
+      if (dbSteps.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>Nenhuma etapa cadastrada ainda no seu painel.</p>
+            ${currentUser.is_admin ? '<a href="admin.html" class="btn btn-secondary">Acessar Admin e Cadastrar</a>' : ''}
+          </div>
+        `;
+        return;
+      }
+
+      dbSteps.forEach((step, idx) => {
+        const stepVideos = dbVideos.filter(v => v.step_id === step.id);
+        
+        const section = document.createElement("div");
+        section.className = "step-section";
+        
+        section.innerHTML = `
+          <div class="step-section__header">
+            <span class="step-section__index">PASSO 0${idx + 1}</span>
+            <h3 class="step-section__title">${step.title}</h3>
+          </div>
+          ${step.description ? `<p class="step-section__desc">${step.description}</p>` : ""}
+          <div class="video-row" id="video-row-${step.id}">
+            <!-- Os tiles dos vídeos serão renderizados aqui -->
+          </div>
+        `;
+        
+        container.appendChild(section);
+
+        const videoRow = document.getElementById(`video-row-${step.id}`);
+
+        if (stepVideos.length === 0) {
+          videoRow.innerHTML = `
+            <div style="font-size:12px; color:var(--color-text-muted); padding: var(--space-3) 0;">
+              Nenhum vídeo nesta seção ainda.
+            </div>
+          `;
+          return;
+        }
+
+        stepVideos.forEach(video => {
+          const isUserPro = currentUser.plan === "pro" || currentUser.is_admin;
+          const isLocked = !video.is_free && !isUserPro;
+          
+          const videoTile = document.createElement("div");
+          videoTile.className = "video-tile";
+          
+          videoTile.innerHTML = `
+            <a href="video.html?id=${video.id}" class="video-link">
+              <div class="video-card">
+                <div class="video-thumbnail-placeholder">
+                  <img src="${getThumbnailPath(video.storage_path)}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';" />
+                  <div class="play-btn-circle">${isLocked ? "🔒" : "▶"}</div>
+                </div>
+                ${isLocked ? `
+                  <div class="video-card__lock">
+                    <span style="font-size: 20px;">🔒</span>
+                    <span style="font-size:10px; font-weight:700; text-transform:uppercase;">Plano Pro</span>
+                  </div>
+                ` : ""}
+                <div class="video-card__overlay">
+                  <!-- Badges -->
+                  <div style="position: absolute; top: var(--space-3); left: var(--space-3);">
+                    ${video.is_free ? `
+                      <span class="badge badge-free">Grátis</span>
+                    ` : `
+                      <span class="badge badge-locked">Premium</span>
+                    `}
+                  </div>
+                </div>
+              </div>
+              <div class="video-tile__title">${video.title}</div>
+            </a>
+          `;
+
+          // Ao clicar em vídeo bloqueado, podemos avisar o usuário se ele for free
+          if (isLocked) {
+            videoTile.querySelector(".video-link").addEventListener("click", (e) => {
+              e.preventDefault();
+              alert("🔒 Este vídeo é exclusivo para assinantes do Plano Pro. Mude seu plano na aba 'Perfil' para simular o acesso!");
+            });
+          }
+
+          videoRow.appendChild(videoTile);
+        });
+      });
+    }
+
+    // Controle de Tabs (SPA)
+    const tabGuiaView = document.getElementById("tab-guia-view");
+    const tabPerfilView = document.getElementById("tab-perfil-view");
+    
+    const navBtnGuia = document.getElementById("nav-btn-guia");
+    const navBtnPerfil = document.getElementById("nav-btn-perfil");
+
+    navBtnGuia.addEventListener("click", (e) => {
+      e.preventDefault();
+      tabGuiaView.classList.remove("hidden");
+      tabPerfilView.classList.add("hidden");
+      navBtnGuia.classList.add("active");
+      navBtnPerfil.classList.remove("active");
+    });
+
+    navBtnPerfil.addEventListener("click", (e) => {
+      e.preventDefault();
+      tabGuiaView.classList.add("hidden");
+      tabPerfilView.classList.remove("hidden");
+      navBtnGuia.classList.remove("active");
+      navBtnPerfil.classList.add("active");
+    });
+
+    // Logout
+    document.getElementById("btn-logout").addEventListener("click", async () => {
+      if (isConfigured) {
+        await supabase.auth.signOut();
+      } else {
+        localStorage.removeItem("mock_session_user");
+      }
+      window.location.href = "index.html";
+    });
+
+    // Inicia verificação
+    checkAuthentication();
+  </script>
+</body>
+</html>

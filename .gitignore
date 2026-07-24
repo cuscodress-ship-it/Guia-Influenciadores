@@ -1,0 +1,9 @@
+# Vídeos originais brutos (arquivos de origem, não vão pro site)
+*.MOV
+*.mov
+
+# Vídeos grandes de produção: hospedados no Vercel Blob, não no Git
+assets/video/*.mp4
+
+# Node (caso alguém rode npm/vite localmente)
+node_modules/
