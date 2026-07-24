@@ -33,6 +33,14 @@
       padding: 6px 12px;
       border-radius: var(--radius-pill);
     }
+    .ref-card--highlight {
+      background: #d9f5ee;
+      border-color: #a7e8d6;
+    }
+    .ref-card--highlight .ref-card__link {
+      background: #ffffff;
+      color: #0f7a5f;
+    }
   </style>
 </head>
 <body>
@@ -118,15 +126,16 @@
       }
 
       container.innerHTML = refs
-        .map(
-          (ref) => `
-            <div class="ref-card">
+        .map((ref) => {
+          const isPdf = ref.url.toLowerCase().includes(".pdf");
+          return `
+            <div class="ref-card ${isPdf ? "ref-card--highlight" : ""}">
               <div class="ref-card__title">${ref.title}</div>
               ${ref.description ? `<div class="ref-card__desc">${ref.description}</div>` : ""}
-              <a class="ref-card__link" href="${ref.url}" target="_blank" rel="noopener">${ref.url.toLowerCase().includes(".pdf") ? "Abrir PDF ↗" : "Abrir vídeo ↗"}</a>
+              <a class="ref-card__link" href="${ref.url}" target="_blank" rel="noopener">${isPdf ? "Abrir PDF ↗" : "Abrir vídeo ↗"}</a>
             </div>
-          `
-        )
+          `;
+        })
         .join("");
     }
 
