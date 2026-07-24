@@ -7,3 +7,4 @@ assets/video/*.mp4
 
 # Node (caso alguém rode npm/vite localmente)
 node_modules/
+BRIEFING_PIAVE.pdf
