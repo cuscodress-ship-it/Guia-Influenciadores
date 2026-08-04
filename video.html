@@ -110,26 +110,6 @@
       background: var(--color-accent);
       transition: width 0.1s linear;
     }
-    /* Bloqueio de Acesso */
-    .lock-screen-wrapper {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 40;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-5);
-    }
-    .lock-box {
-      text-align: center;
-      background: #1c1b1f;
-      border: 1px solid #2c2b30;
-      border-radius: var(--radius-lg);
-      padding: var(--space-6) var(--space-5);
-      max-width: 340px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
   </style>
 </head>
 <body class="no-nav">
@@ -145,18 +125,6 @@
     <!-- Container do Vídeo -->
     <div class="video-container-wrapper">
       
-      <!-- Box de Bloqueio (Premium) -->
-      <div class="lock-screen-wrapper hidden" id="lock-screen">
-        <div class="lock-box">
-          <span style="font-size: 48px; display:block; margin-bottom: var(--space-3);">👑</span>
-          <h3 style="font-weight: 800; font-size: 20px; color:#fff; margin-bottom: var(--space-2);">Conteúdo Exclusivo</h3>
-          <p class="text-muted" style="font-size:14px; margin-bottom: var(--space-5);">
-            Esta aula pertence ao <strong>Plano Pro</strong>. Faça um upgrade no seu perfil para liberar acesso a todo o manual.
-          </p>
-          <a href="area-de-membros.html" class="btn btn-primary">Voltar e Mudar Plano</a>
-        </div>
-      </div>
-
       <!-- Card do Vídeo Vertical -->
       <div class="video-card" id="video-card-element">
         
@@ -211,7 +179,6 @@
     const videoDescEl = document.getElementById("video-desc");
     const lessonIndexTitle = document.getElementById("lesson-index-title");
     
-    const lockScreen = document.getElementById("lock-screen");
     const btnLike = document.getElementById("btn-like");
     const btnComplete = document.getElementById("btn-complete");
     const btnNext = document.getElementById("btn-next-lesson");
@@ -228,38 +195,14 @@
       return `assets/img/capa-${filename}.jpg`;
     }
 
-    let currentUser = null;
     let currentVideo = null;
     let allVideos = [];
 
-    // Carregar informações de autenticação e conteúdo
+    // Carrega conteúdo do vídeo
     async function initPlayer() {
       if (!videoId) {
         window.location.href = "area-de-membros.html";
         return;
-      }
-
-      if (isConfigured) {
-        // Auth real
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          window.location.href = "entrar.html";
-          return;
-        }
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-        currentUser = profile;
-      } else {
-        // Auth mock
-        const sessionUser = localStorage.getItem("mock_session_user");
-        if (!sessionUser) {
-          window.location.href = "entrar.html";
-          return;
-        }
-        currentUser = JSON.parse(sessionUser);
       }
 
       await loadVideoData();
@@ -286,13 +229,6 @@
         if (!currentVideo) {
           alert("Vídeo não encontrado.");
           window.location.href = "area-de-membros.html";
-          return;
-        }
-
-        // Valida plano do usuário
-        const isUserPro = currentUser.plan === "pro" || currentUser.is_admin;
-        if (!currentVideo.is_free && !isUserPro) {
-          lockScreen.classList.remove("hidden");
           return;
         }
 

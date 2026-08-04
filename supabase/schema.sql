@@ -41,9 +41,9 @@ create table if not exists public.steps (
 
 alter table public.steps enable row level security;
 
-create policy "Qualquer logado vê os passos"
+create policy "Qualquer pessoa vê os passos"
   on public.steps for select
-  to authenticated
+  to public
   using (true);
 
 create policy "Só admin gerencia passos"
@@ -69,9 +69,9 @@ create table if not exists public.videos (
 
 alter table public.videos enable row level security;
 
-create policy "Qualquer logado vê os metadados dos vídeos"
+create policy "Qualquer pessoa vê os metadados dos vídeos"
   on public.videos for select
-  to authenticated
+  to public
   using (true);
 
 create policy "Só admin gerencia vídeos"
@@ -104,9 +104,9 @@ create trigger on_auth_user_created
 -- correto (logados assistem, só admin envia/apaga).
 -- ============================================================
 
-create policy "Logados podem assistir (baixar) vídeos"
+create policy "Qualquer pessoa pode assistir (baixar) vídeos"
   on storage.objects for select
-  to authenticated
+  to public
   using (bucket_id = 'videos');
 
 create policy "Só admin envia vídeos"

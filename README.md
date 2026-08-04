@@ -2,7 +2,7 @@
 
 Esta é uma plataforma web mobile-first voltada para a distribuição de conteúdo e vídeos no formato vertical 9:16 (reels, TikToks e shorts), auxiliando influenciadoras a crescerem suas redes sociais.
 
-A plataforma integra-se ao **Supabase** para gerenciamento de usuários (auth), perfis, passos do guia e controle de acesso a vídeos.
+O conteúdo (index, área de membros, vídeos, referências) é aberto, sem exigir cadastro/login. Só o painel `/admin.html` continua protegido por login — a plataforma usa o **Supabase** para essa autenticação de administrador e para armazenar passos, vídeos e referências.
 
 ---
 
@@ -18,10 +18,9 @@ Para que você possa interagir e testar a plataforma imediatamente, ela possui u
 
 ## 🛠️ Estrutura do Projeto
 
-* `index.html`: Landing page e apresentação da plataforma.
-* `cadastro.html`: Página de registro de usuário.
-* `entrar.html`: Página de login.
-* `area-de-membros.html`: Dashboard com os passos e fileiras de vídeos.
+* `index.html`: Landing page e apresentação da plataforma (acesso livre).
+* `cadastro.html` / `entrar.html`: Cadastro e login — usados só para criar/acessar a conta de administrador.
+* `area-de-membros.html`: Dashboard com os passos e fileiras de vídeos (acesso livre).
 * `video.html`: Player imersivo em 9:16 para reprodução dos vídeos verticais.
 * `admin.html`: Painel para gerenciamento de passos e vídeos (inserção e exclusão).
 * `assets/`
@@ -38,6 +37,7 @@ Para que você possa interagir e testar a plataforma imediatamente, ela possui u
 Quando decidir conectar a plataforma ao seu banco de dados real do Supabase:
 
 1. **Rode o SQL**: Copie o conteúdo de [supabase/schema.sql](file:///c:/Users/julia/Desktop/manual%20de%20rede%20social/supabase/schema.sql) e execute no SQL Editor do seu painel do Supabase.
+   * Se o projeto Supabase já existia antes da remoção do login público, rode também [supabase/migration_remove_login.sql](file:///c:/Users/julia/Desktop/manual%20de%20rede%20social/supabase/migration_remove_login.sql) para liberar a leitura do conteúdo sem exigir login.
 2. **Crie o Bucket de Storage**:
    * No painel do Supabase, vai em **Storage** e clique em **Create a new bucket**.
    * Nomeie o bucket como `videos`.

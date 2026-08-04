@@ -84,23 +84,6 @@
 
     const container = document.getElementById("refs-container");
 
-    async function checkAuthentication() {
-      if (isConfigured) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          window.location.href = "entrar.html";
-          return;
-        }
-      } else {
-        const sessionUser = localStorage.getItem("mock_session_user");
-        if (!sessionUser) {
-          window.location.href = "entrar.html";
-          return;
-        }
-      }
-      await loadReferences();
-    }
-
     async function loadReferences() {
       let refs = [];
       try {
@@ -139,7 +122,7 @@
         .join("");
     }
 
-    checkAuthentication();
+    loadReferences();
   </script>
 </body>
 </html>

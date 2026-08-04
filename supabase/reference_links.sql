@@ -15,9 +15,9 @@ create table if not exists public.reference_links (
 
 alter table public.reference_links enable row level security;
 
-create policy "Qualquer logado vê as referências"
+create policy "Qualquer pessoa vê as referências"
   on public.reference_links for select
-  to authenticated
+  to public
   using (true);
 
 create policy "Só admin gerencia referências"

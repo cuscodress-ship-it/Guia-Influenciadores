@@ -69,28 +69,6 @@
       margin: 0 auto var(--space-3);
       border: 3px solid var(--color-border);
     }
-    .plan-selector-box {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--space-4);
-      margin-top: var(--space-4);
-    }
-    .plan-selector-box h4 {
-      font-size: 14px;
-      margin-bottom: var(--space-2);
-    }
-    .plan-option {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--space-2) 0;
-      cursor: pointer;
-    }
-    .plan-option input {
-      width: 18px;
-      height: 18px;
-    }
     .video-thumbnail-placeholder {
       width: 100%;
       height: 100%;
@@ -134,9 +112,9 @@
     <div id="tab-guia-view">
       <!-- Boas-vindas -->
       <div class="user-banner">
-        <div class="user-banner__greet">Olá, bem-vinda de volta!</div>
-        <h2 class="user-banner__name" id="user-display-name">Carregando...</h2>
-        <div class="user-banner__plan" id="user-display-plan">Plano...</div>
+        <div class="user-banner__greet">Olá!</div>
+        <h2 class="user-banner__name">Guia para Influenciadoras</h2>
+        <div class="user-banner__plan">✨ Acesso liberado</div>
       </div>
 
       <!-- Container do Guia -->
@@ -155,41 +133,15 @@
     <div id="tab-perfil-view" class="hidden">
       <div class="container stack" style="gap: var(--space-4); padding-top: var(--space-6);">
         <div class="profile-card">
-          <div class="profile-avatar" id="profile-avatar-initials">U</div>
-          <h3 id="profile-name" style="margin-bottom: var(--space-1); font-weight:800;">Nome do Usuário</h3>
-          <p id="profile-email" class="text-muted" style="font-size:14px; margin-bottom:0;">email@exemplo.com</p>
-        </div>
-
-        <div class="plan-selector-box">
-          <h4>👑 Configuração da Conta</h4>
-          <p class="text-muted" style="font-size: 12px; margin-bottom: var(--space-3);">
-            No modo de demonstração, alterne seu plano abaixo para testar o acesso aos vídeos bloqueados (Pro).
-          </p>
-          <div class="stack" style="gap: var(--space-2);">
-            <label class="plan-option">
-              <div>
-                <strong>Plano Gratuito</strong>
-                <div class="text-muted" style="font-size: 11px;">Acesso apenas aos conteúdos iniciais</div>
-              </div>
-              <input type="radio" name="plan-selector" id="plan-radio-free" value="free">
-            </label>
-            <hr style="border:0; border-top:1px solid var(--color-border); margin:0;">
-            <label class="plan-option">
-              <div>
-                <strong>Plano Pro 👑</strong>
-                <div class="text-muted" style="font-size: 11px;">Liberação total de todos os vídeos</div>
-              </div>
-              <input type="radio" name="plan-selector" id="plan-radio-pro" value="pro">
-            </label>
-          </div>
+          <div class="profile-avatar">J</div>
+          <h3 style="margin-bottom: var(--space-1); font-weight:800;">Guia para Influenciadoras</h3>
+          <p class="text-muted" style="font-size:14px; margin-bottom:0;">Ministrado por Julia Louren</p>
         </div>
 
         <div class="stack" style="gap: var(--space-3); margin-top: var(--space-5);">
-          <!-- Botão Admin, aparece apenas se is_admin = true -->
-          <a href="admin.html" class="btn btn-secondary hidden" id="admin-panel-link" style="border-color: var(--color-accent); color: var(--color-accent);">
-            🛠️ Acessar Painel Admin
+          <a href="admin.html" class="btn btn-secondary" style="border-color: var(--color-accent); color: var(--color-accent);">
+            🛠️ Painel Admin
           </a>
-          <button id="btn-logout" class="btn btn-secondary" style="color: #e64980;">Sair da Conta</button>
         </div>
 
         <p class="text-center text-muted" style="font-size: 12px; margin-top: var(--space-5);">
@@ -222,7 +174,6 @@
 
     warnIfNotConfigured();
 
-    let currentUser = null;
     let dbSteps = [];
     let dbVideos = [];
 
@@ -238,94 +189,8 @@
       return `assets/img/capa-${filename}.jpg`;
     }
 
-    // Redireciona se não houver login
-    async function checkAuthentication() {
-      if (isConfigured) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          window.location.href = "entrar.html";
-          return;
-        }
-        // Busca perfil no Supabase
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-        currentUser = profile;
-      } else {
-        // Modo mock
-        document.getElementById("mock-banner").style.display = "flex";
-        const sessionUser = localStorage.getItem("mock_session_user");
-        if (!sessionUser) {
-          window.location.href = "entrar.html";
-          return;
-        }
-        currentUser = JSON.parse(sessionUser);
-      }
-
-      setupInterface();
-      await loadContent();
-    }
-
-    // Configura a interface com os dados do usuário
-    function setupInterface() {
-      if (!currentUser) return;
-      
-      // Atualiza aba Guia
-      document.getElementById("user-display-name").textContent = currentUser.name || "Influenciadora";
-      
-      const planEl = document.getElementById("user-display-plan");
-      const isAdmin = currentUser.is_admin;
-      planEl.innerHTML = isAdmin ? "👑 Administrador" : (currentUser.plan === "pro" ? "⭐ Plano Pro" : "Plano Gratuito");
-      
-      // Atualiza aba Perfil
-      document.getElementById("profile-name").textContent = currentUser.name || "Influenciadora";
-      document.getElementById("profile-email").textContent = currentUser.email || "";
-      document.getElementById("profile-avatar-initials").textContent = (currentUser.name || "U").substring(0, 1).toUpperCase();
-
-      // Configura radio buttons do plano
-      if (currentUser.plan === "pro") {
-        document.getElementById("plan-radio-pro").checked = true;
-      } else {
-        document.getElementById("plan-radio-free").checked = true;
-      }
-
-      // Mostra painel admin se for administrador
-      if (isAdmin) {
-        document.getElementById("admin-panel-link").classList.remove("hidden");
-      } else {
-        document.getElementById("admin-panel-link").classList.add("hidden");
-      }
-    }
-
-    // Escuta mudança de plano (Modo Mock apenas)
-    document.getElementById("plan-radio-free").addEventListener("change", () => changePlanMock("free"));
-    document.getElementById("plan-radio-pro").addEventListener("change", () => changePlanMock("pro"));
-
-    function changePlanMock(newPlan) {
-      if (isConfigured) {
-        alert("Para mudar o plano no Supabase, altere a coluna 'plan' do seu perfil na tabela public.profiles.");
-        // Restaura valor
-        setupInterface();
-        return;
-      }
-      currentUser.plan = newPlan;
-      
-      // Atualiza no localStorage a sessão atual
-      localStorage.setItem("mock_session_user", JSON.stringify(currentUser));
-      
-      // Atualiza também na lista de usuários cadastrados
-      const users = JSON.parse(localStorage.getItem("mock_users") || "[]");
-      const index = users.findIndex(u => u.email === currentUser.email);
-      if (index !== -1) {
-        users[index].plan = newPlan;
-        localStorage.setItem("mock_users", JSON.stringify(users));
-      }
-      
-      setupInterface();
-      // Recarrega o conteúdo para reavaliar os cadeados
-      renderContent();
+    if (!isConfigured) {
+      document.getElementById("mock-banner").style.display = "flex";
     }
 
     // Carrega dados das tabelas
@@ -418,7 +283,7 @@
         container.innerHTML = `
           <div class="empty-state">
             <p>Nenhuma etapa cadastrada ainda no seu painel.</p>
-            ${currentUser.is_admin ? '<a href="admin.html" class="btn btn-secondary">Acessar Admin e Cadastrar</a>' : ''}
+            <a href="admin.html" class="btn btn-secondary">Acessar Admin e Cadastrar</a>
           </div>
         `;
         return;
@@ -455,47 +320,26 @@
         }
 
         stepVideos.forEach(video => {
-          const isUserPro = currentUser.plan === "pro" || currentUser.is_admin;
-          const isLocked = !video.is_free && !isUserPro;
-          
           const videoTile = document.createElement("div");
           videoTile.className = "video-tile";
-          
+
           videoTile.innerHTML = `
             <a href="video.html?id=${video.id}" class="video-link">
               <div class="video-card">
                 <div class="video-thumbnail-placeholder">
                   <img src="${getThumbnailPath(video.storage_path)}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';" />
-                  <div class="play-btn-circle">${isLocked ? "🔒" : "▶"}</div>
+                  <div class="play-btn-circle">▶</div>
                 </div>
-                ${isLocked ? `
-                  <div class="video-card__lock">
-                    <span style="font-size: 20px;">🔒</span>
-                    <span style="font-size:10px; font-weight:700; text-transform:uppercase;">Plano Pro</span>
-                  </div>
-                ` : ""}
                 <div class="video-card__overlay">
                   <!-- Badges -->
                   <div style="position: absolute; top: var(--space-3); left: var(--space-3);">
-                    ${video.is_free ? `
-                      <span class="badge badge-free">Grátis</span>
-                    ` : `
-                      <span class="badge badge-locked">Premium</span>
-                    `}
+                    <span class="badge badge-free">Grátis</span>
                   </div>
                 </div>
               </div>
               <div class="video-tile__title">${video.title}</div>
             </a>
           `;
-
-          // Ao clicar em vídeo bloqueado, podemos avisar o usuário se ele for free
-          if (isLocked) {
-            videoTile.querySelector(".video-link").addEventListener("click", (e) => {
-              e.preventDefault();
-              alert("🔒 Este vídeo é exclusivo para assinantes do Plano Pro. Mude seu plano na aba 'Perfil' para simular o acesso!");
-            });
-          }
 
           videoRow.appendChild(videoTile);
         });
@@ -525,18 +369,8 @@
       navBtnPerfil.classList.add("active");
     });
 
-    // Logout
-    document.getElementById("btn-logout").addEventListener("click", async () => {
-      if (isConfigured) {
-        await supabase.auth.signOut();
-      } else {
-        localStorage.removeItem("mock_session_user");
-      }
-      window.location.href = "index.html";
-    });
-
-    // Inicia verificação
-    checkAuthentication();
+    // Inicia carregamento do conteúdo
+    loadContent();
   </script>
 </body>
 </html>
