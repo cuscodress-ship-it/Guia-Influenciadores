@@ -9,8 +9,8 @@
 // definidas em supabase/schema.sql.
 // ============================================================
 
-export const SUPABASE_URL = "https://tatdliycwplyrkiusiyg.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_06u0YkFSuI0Vqwq-ThgLsA_qGiEKyX4";
+export const SUPABASE_URL = "https://domokbsxqhnemdygjrel.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_H3CKTiRjEM_Rny7glvxj-w_7BEujSJZ";
 
 export const isConfigured =
   SUPABASE_URL &&
