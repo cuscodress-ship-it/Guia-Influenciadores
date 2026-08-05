@@ -91,7 +91,7 @@
 
     <!-- Topbar -->
     <div class="topbar">
-      <a href="area-de-membros.html" class="topbar__back">←</a>
+      <a href="index.html" class="topbar__back">←</a>
       <div class="topbar__title">Painel de Gerenciamento</div>
     </div>
 
@@ -296,7 +296,7 @@
         
         if (!profile || !profile.is_admin) {
           alert("Acesso restrito para administradores.");
-          window.location.href = "area-de-membros.html";
+          window.location.href = "index.html";
           return;
         }
         currentUser = profile;
@@ -313,7 +313,7 @@
         currentUser = JSON.parse(sessionUser);
         if (!currentUser.is_admin) {
           alert("Você precisa simular um login Admin para ver esta página.");
-          window.location.href = "area-de-membros.html";
+          window.location.href = "index.html";
           return;
         }
       }

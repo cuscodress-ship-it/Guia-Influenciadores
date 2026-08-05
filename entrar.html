@@ -129,7 +129,7 @@
       msgContainer.innerHTML = `<div class="form-message success">Entrando como ${mockUser.name}...</div>`;
       
       setTimeout(() => {
-        window.location.href = "area-de-membros.html";
+        window.location.href = "admin.html";
       }, 800);
     }
 
@@ -155,7 +155,7 @@
 
           msgContainer.innerHTML = `<div class="form-message success">Login bem-sucedido! Redirecionando...</div>`;
           setTimeout(() => {
-            window.location.href = "area-de-membros.html";
+            window.location.href = "admin.html";
           }, 1000);
         } else {
           // Login simulado (Modo Mock)
@@ -172,7 +172,7 @@
           msgContainer.innerHTML = `<div class="form-message success">Login simulado com sucesso! Redirecionando...</div>`;
           
           setTimeout(() => {
-            window.location.href = "area-de-membros.html";
+            window.location.href = "admin.html";
           }, 1000);
         }
       } catch (err) {
